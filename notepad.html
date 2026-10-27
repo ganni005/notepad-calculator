@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f7fb">
+  <title>Notes</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #202431;
+      background: #f6f7fb;
+      font-synthesis: none;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-width: 280px;
+      min-height: 100vh;
+      margin: 0;
+      padding: 28px 16px;
+      background:
+        radial-gradient(ellipse at 50% -20%, #e8ebff 0, transparent 48%),
+        #f6f7fb;
+    }
+
+    .app {
+      width: min(100%, 720px);
+      min-height: min(780px, calc(100vh - 56px));
+      margin: 0 auto;
+      overflow: hidden;
+      border: 1px solid #e8eaf1;
+      border-radius: 24px;
+      background: #fff;
+      box-shadow: 0 18px 60px rgb(34 42 74 / 9%);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      min-height: 76px;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      border-bottom: 1px solid #f0f1f5;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: #fff;
+      background: #6558d9;
+      font-size: 19px;
+    }
+
+    .save-status {
+      color: #84899a;
+      font-size: 13px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .action-button {
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid #e6e7ef;
+      border-radius: 11px;
+      color: #5145c7;
+      background: #fff;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .action-button:hover {
+      background: #f7f6ff;
+    }
+
+    .action-button.primary {
+      border-color: #6558d9;
+      color: #fff;
+      background: #6558d9;
+    }
+
+    .action-button.primary:hover {
+      background: #574bc9;
+    }
+
+    .action-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .action-button:focus-visible,
+    .note-slot:focus-visible {
+      outline: 3px solid #c9c4ff;
+      outline-offset: 2px;
+    }
+
+    .notes-bar {
+      padding: 14px 24px 12px;
+      border-bottom: 1px solid #f0f1f5;
+    }
+
+    .notes-heading {
+      margin: 0 0 10px;
+      color: #898d9b;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.9px;
+      text-transform: uppercase;
+    }
+
+    .note-list {
+      display: flex;
+      gap: 9px;
+      overflow-x: auto;
+      padding: 2px 2px 5px;
+      scrollbar-width: thin;
+    }
+
+    .note-slot {
+      width: 150px;
+      min-width: 150px;
+      padding: 10px 12px;
+      overflow: hidden;
+      border: 1px solid #e9eaf1;
+      border-radius: 12px;
+      color: #414657;
+      background: #fff;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .note-slot.active {
+      border-color: #8178e7;
+      background: #f7f6ff;
+      box-shadow: inset 0 0 0 1px #8178e7;
+    }
+
+    .slot-title,
+    .slot-preview {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .slot-title {
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .slot-preview {
+      margin-top: 4px;
+      color: #9296a4;
+      font-size: 11px;
+    }
+
+    .empty-notes {
+      padding: 5px 1px;
+      color: #9a9eab;
+      font-size: 13px;
+    }
+
+    .note-area {
+      flex: 1;
+      padding: 28px 32px 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .note-title {
+      width: 100%;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      color: #202431;
+      background: transparent;
+      font: inherit;
+      font-size: clamp(24px, 5vw, 30px);
+      font-weight: 700;
+      letter-spacing: -0.8px;
+    }
+
+    .note-title::placeholder {
+      color: #c3c6d1;
+    }
+
+    .note-text {
+      width: 100%;
+      min-height: 0;
+      flex: 0 0 auto;
+      margin-top: 20px;
+      padding: 0;
+      overflow: hidden;
+      resize: none;
+      border: 0;
+      outline: 0;
+      color: #414657;
+      background: transparent;
+      font: inherit;
+      font-size: 17px;
+      line-height: 1.8;
+      tab-size: 2;
+    }
+
+    .note-text::placeholder {
+      color: #a4a8b6;
+    }
+
+    .calculator {
+      margin-top: 4px;
+      padding: 12px 0 0;
+      border-top: 1px solid #eeeaff;
+      animation: appear 160ms ease-out;
+    }
+
+    .calculator-label {
+      margin-bottom: 6px;
+      color: #85809e;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .calculator-row {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .calculator-expression {
+      overflow-wrap: anywhere;
+      color: #68637d;
+      font-size: 17px;
+    }
+
+    .calculator-result {
+      color: #5145c7;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .calculator-result.error {
+      color: #bb5353;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .bottom-bar {
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      color: #9a9eab;
+      border-top: 1px solid #f0f1f5;
+      font-size: 12px;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 540px) {
+      body {
+        padding: 0;
+        background: #fff;
+      }
+
+      .app {
+        min-height: 100vh;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .topbar {
+        min-height: 66px;
+        padding: 10px 16px;
+      }
+
+      .brand {
+        gap: 8px;
+        font-size: 16px;
+      }
+
+      .brand-icon {
+        width: 34px;
+        height: 34px;
+      }
+
+      .header-actions {
+        gap: 6px;
+      }
+
+      .action-button {
+        min-height: 36px;
+        padding: 0 10px;
+        font-size: 12px;
+      }
+
+      .save-status {
+        display: none;
+      }
+
+      .notes-bar {
+        padding: 12px 16px 10px;
+      }
+
+      .note-area {
+        padding: 26px 22px 18px;
+      }
+
+      .note-text {
+        min-height: 0;
+        font-size: 16px;
+      }
+
+      .calculator {
+        margin-top: 4px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">▤</span>
+        <span>My Notes</span>
+      </div>
+      <div class="header-actions">
+        <span class="save-status" id="save-status" role="status">New note</span>
+        <button class="action-button" id="new-note" type="button">+ New</button>
+        <button class="action-button primary" id="save-note" type="button">Save</button>
+      </div>
+    </header>
+
+    <nav class="notes-bar" aria-label="Saved notes">
+      <h2 class="notes-heading">Your notes</h2>
+      <div class="note-list" id="note-list"></div>
+    </nav>
+
+    <section class="note-area" aria-label="Note editor">
+      <input class="note-title" id="note-title" type="text" placeholder="Untitled note" aria-label="Note title" autocomplete="off">
+      <textarea class="note-text" id="note-text" rows="1" placeholder="Start writing your note..." aria-label="Note text" spellcheck="true"></textarea>
+
+      <section class="calculator" id="calculator" aria-live="polite" hidden>
+        <div class="calculator-label">Answer</div>
+        <div class="calculator-row">
+          <span class="calculator-expression" id="calculator-expression"></span>
+          <output class="calculator-result" id="calculator-result"></output>
+        </div>
+      </section>
+    </section>
+
+    <footer class="bottom-bar">
+      <span>Notes are stored on this device</span>
+      <span id="character-count">0 characters</span>
+    </footer>
+  </main>
+
+  <script>
+    const titleInput = document.getElementById("note-title");
+    const noteInput = document.getElementById("note-text");
+    const saveStatus = document.getElementById("save-status");
+    const calculator = document.getElementById("calculator");
+    const calculatorExpression = document.getElementById("calculator-expression");
+    const calculatorResult = document.getElementById("calculator-result");
+    const characterCount = document.getElementById("character-count");
+    const noteList = document.getElementById("note-list");
+    const saveButton = document.getElementById("save-note");
+    const newNoteButton = document.getElementById("new-note");
+    const storageKey = "simple-notepad-notes";
+    const legacyStorageKey = "simple-notepad-note";
+    let notes = [];
+    let activeNoteId = null;
+    let savedContent = { title: "", text: "" };
+
+    function evaluateExpression(source) {
+      const tokens = source.replace(/[×x]/gi, "*").replace(/÷/g, "/").match(/\d*\.?\d+|[()+\-*/%]/g);
+      if (!tokens) throw new Error("Enter a calculation");
+
+      const normalized = source.replace(/[×x]/gi, "*").replace(/÷/g, "/").replace(/\s/g, "");
+      if (tokens.join("") !== normalized) throw new Error("Check the expression");
+
+      let position = 0;
+
+      function parsePrimary() {
+        const token = tokens[position++];
+        if (token === "+" || token === "-") {
+          const value = parsePrimary();
+          return token === "-" ? -value : value;
+        }
+        if (token === "(") {
+          const value = parseSum();
+          if (tokens[position++] !== ")") throw new Error("Check the brackets");
+          return value;
+        }
+        const value = Number(token);
+        if (!Number.isFinite(value)) throw new Error("Check the number");
+        return value;
+      }
+
+      function parseProduct() {
+        let value = parsePrimary();
+        while (tokens[position] === "*" || tokens[position] === "/" || tokens[position] === "%") {
+          const operator = tokens[position++];
+          const right = parsePrimary();
+          if ((operator === "/" || operator === "%") && right === 0) throw new Error("Cannot divide by zero");
+          if (operator === "*") value *= right;
+          if (operator === "/") value /= right;
+          if (operator === "%") value %= right;
+        }
+        return value;
+      }
+
+      function parseSum() {
+        let value = parseProduct();
+        while (tokens[position] === "+" || tokens[position] === "-") {
+          const operator = tokens[position++];
+          const right = parseProduct();
+          value = operator === "+" ? value + right : value - right;
+        }
+        return value;
+      }
+
+      const result = parseSum();
+      if (position !== tokens.length) throw new Error("Check the expression");
+      if (!Number.isFinite(result)) throw new Error("Result is too large");
+      return result;
+    }
+
+    function findExpression(line) {
+      const candidates = line.match(/[0-9().+\-*/%×÷xX\s]+/g) || [];
+      for (let index = candidates.length - 1; index >= 0; index -= 1) {
+        const candidate = candidates[index].trim();
+        if (/\d/.test(candidate) && /[+\-*/%×÷xX]/.test(candidate)) return candidate;
+      }
+      return "";
+    }
+
+    function updateCalculator() {
+      const currentLine = noteInput.value.split(/\r?\n/).pop() || "";
+      const expression = findExpression(currentLine);
+      calculator.hidden = !expression;
+      if (!expression) return;
+
+      calculatorExpression.textContent = expression;
+      calculatorResult.classList.remove("error");
+      try {
+        const result = evaluateExpression(expression);
+        calculatorResult.textContent = "= " + Number(result.toPrecision(12)).toString();
+      } catch (error) {
+        calculatorResult.textContent = error.message;
+        calculatorResult.classList.add("error");
+      }
+    }
+
+    function resizeNoteInput() {
+      noteInput.style.height = "auto";
+      noteInput.style.height = noteInput.scrollHeight + "px";
+    }
+
+    function updateCount() {
+      const count = noteInput.value.length;
+      characterCount.textContent = count + (count === 1 ? " character" : " characters");
+    }
+
+    function currentContent() {
+      return { title: titleInput.value, text: noteInput.value };
+    }
+
+    function hasUnsavedChanges() {
+      const current = currentContent();
+      return current.title !== savedContent.title || current.text !== savedContent.text;
+    }
+
+    function updateStatus() {
+      const dirty = hasUnsavedChanges();
+      saveStatus.textContent = dirty
+        ? "Unsaved changes"
+        : activeNoteId ? "Saved automatically" : "New note";
+      saveButton.disabled = !dirty;
+    }
+
+    function renderNotes() {
+      const scrollPosition = noteList.scrollLeft;
+      noteList.replaceChildren();
+      if (notes.length === 0) {
+        const emptyMessage = document.createElement("span");
+        emptyMessage.className = "empty-notes";
+        emptyMessage.textContent = "Saved notes will appear here";
+        noteList.append(emptyMessage);
+        return;
+      }
+
+      for (const note of notes) {
+        const slot = document.createElement("button");
+        slot.className = "note-slot";
+        slot.type = "button";
+        slot.classList.toggle("active", note.id === activeNoteId);
+        slot.setAttribute("aria-current", note.id === activeNoteId ? "true" : "false");
+
+        const title = document.createElement("span");
+        title.className = "slot-title";
+        title.textContent = note.title.trim() || "Untitled note";
+
+        const preview = document.createElement("span");
+        preview.className = "slot-preview";
+        preview.textContent = note.text.trim() || "No additional text";
+
+        slot.append(title, preview);
+        slot.addEventListener("click", () => openNote(note.id));
+        noteList.append(slot);
+      }
+      noteList.scrollLeft = scrollPosition;
+    }
+
+    function persistNotes() {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(notes));
+        return true;
+      } catch (error) {
+        saveStatus.textContent = "Could not save notes";
+        console.error("Unable to save notes:", error);
+        return false;
+      }
+    }
+
+    function openNote(noteId) {
+      if (hasUnsavedChanges() && !window.confirm("Discard your unsaved changes and open another note?")) return;
+      const note = notes.find((item) => item.id === noteId);
+      if (!note) return;
+
+      activeNoteId = note.id;
+      titleInput.value = note.title;
+      noteInput.value = note.text;
+      savedContent = currentContent();
+      renderNotes();
+      resizeNoteInput();
+      updateCalculator();
+      updateCount();
+      updateStatus();
+    }
+
+    function startNewNote() {
+      if (hasUnsavedChanges() && !window.confirm("Could not save your changes. Discard them and start a new note?")) return;
+      activeNoteId = null;
+      titleInput.value = "";
+      noteInput.value = "";
+      savedContent = { title: "", text: "" };
+      renderNotes();
+      resizeNoteInput();
+      updateCalculator();
+      updateCount();
+      updateStatus();
+      titleInput.focus();
+    }
+
+    function autoSaveCurrentNote() {
+      const content = currentContent();
+      const existingIndex = notes.findIndex((note) => note.id === activeNoteId);
+      if (existingIndex >= 0) {
+        notes[existingIndex] = { ...notes[existingIndex], ...content };
+      } else {
+        if (!content.title.trim() && !content.text.trim()) {
+          updateStatus();
+          return;
+        }
+        activeNoteId = Date.now().toString(36) + Math.random().toString(36).slice(2);
+        notes.unshift({ id: activeNoteId, ...content });
+      }
+
+      if (!persistNotes()) return;
+      savedContent = content;
+      renderNotes();
+      updateStatus();
+    }
+
+    function saveCurrentNote() {
+      autoSaveCurrentNote();
+    }
+
+    function loadNotes() {
+      let loadError = false;
+      try {
+        const storedNotes = localStorage.getItem(storageKey);
+        if (storedNotes !== null) {
+          const parsedNotes = JSON.parse(storedNotes);
+          if (!Array.isArray(parsedNotes)) throw new Error("Saved notes have an invalid format");
+          notes = parsedNotes.filter((note) =>
+            note &&
+            typeof note.id === "string" &&
+            typeof note.title === "string" &&
+            typeof note.text === "string"
+          );
+        } else {
+          const legacyNote = localStorage.getItem(legacyStorageKey);
+          if (legacyNote) {
+            const parsedNote = JSON.parse(legacyNote);
+            if (parsedNote && typeof parsedNote.title === "string" && typeof parsedNote.text === "string" &&
+                (parsedNote.title.trim() || parsedNote.text.trim())) {
+              notes = [{
+                id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+                title: parsedNote.title,
+                text: parsedNote.text
+              }];
+              if (!persistNotes()) loadError = true;
+            }
+          }
+        }
+      } catch (error) {
+        loadError = true;
+        console.error("Unable to load saved notes:", error);
+      }
+
+      if (notes.length > 0) {
+        activeNoteId = notes[0].id;
+        titleInput.value = notes[0].title;
+        noteInput.value = notes[0].text;
+        savedContent = currentContent();
+      }
+      renderNotes();
+      resizeNoteInput();
+      updateStatus();
+      if (loadError) saveStatus.textContent = "Could not load saved notes";
+    }
+
+    titleInput.addEventListener("input", () => {
+      updateStatus();
+      autoSaveCurrentNote();
+    });
+    noteInput.addEventListener("input", () => {
+      resizeNoteInput();
+      updateCalculator();
+      updateCount();
+      updateStatus();
+      autoSaveCurrentNote();
+    });
+
+    saveButton.addEventListener("click", saveCurrentNote);
+    newNoteButton.addEventListener("click", startNewNote);
+    window.addEventListener("pagehide", autoSaveCurrentNote);
+    loadNotes();
+    updateCalculator();
+    updateCount();
+  </script>
+</body>
+</html>
